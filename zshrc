@@ -420,6 +420,9 @@ set_up_prompt () {
     fi
   done
   uptime_load="${PR_STUFF[SHIFT_OUT]}${color_loads}${PR_STUFF[SHIFT_IN]}"
+
+  PR_STUFF[BRANCH]=`git branch --no-color 2> /dev/null | egrep '^\*' | sed -e 's/* \(.*\)/\1/'`
+
   ## time zone stuff - a linux system with a half-broken strftime(3) showed me that i like seeing
   ## the city name of the time zone i'm in. if that's not available then show the short version
   ## if you just want the short version use this: PR_STUFF[TZ]=$(print -P '%D{%Z}')
@@ -436,8 +439,12 @@ set_up_prompt () {
       PR_STUFF[TZ_LAST]=${TZ}
       PR_STUFF[TZ]=${${TZ:t}:-$(print -P '%D{%Z}')}
   fi
+
   ## how much space will the time take up
   local time_space="${#${(%):-$(print -P '%D{%H:%M} '${PR_STUFF[TZ]})}}"
+
+  local branchsize="${#${(%):-$(print ${PR_STUFF[BRANCH]})}}"
+
   ## if there's battery info, get it. otherwise don't (gracefully)
   ## the battery info comes from "/root/bin/bat-mon"
   ## check that /tmp/battery-status is a plain file
@@ -454,12 +461,16 @@ set_up_prompt () {
       setopt NOMATCH ## return that to normal
       local promptsize=$[${#${(%):-xx%n@%M:}} + ${uptime_load_size} + time_space + 2]
   fi
+
   ## count up the width of the things that are on the prompt
   local pwdsize=${#${(%):-%(1/.%~/.%~)}}
-  local termwidth_minus_promptsize_minus_pwdsize=$[${TERMWIDTH} - ${promptsize} - ${pwdsize}]
+  
+  local termwidth_minus_promptsize_minus_pwdsize=$[${TERMWIDTH} - ${promptsize} - ${pwdsize} - ${branchsize} ]
+
   [[ 0 -gt ${termwidth_minus_promptsize_minus_pwdsize} ]] && termwidth_minus_promptsize_minus_pwdsize='0'
   PR_STUFF[PWDLEN]=$[${TERMWIDTH} - ${promptsize}]
   [[ 0 -gt $PR_STUFF[PWDLEN] ]] && PR_STUFF[PWDLEN]=1
+
   PR_STUFF[FILLBAR]="\${(r:${termwidth_minus_promptsize_minus_pwdsize}::${ACS[HLINE]}:)}\
 ${ACS[RTEE]}${PR_STUFF[TIME]}${PR_STUFF[SHIFT_OUT]}%D{%H:%M} ${PR_STUFF[TIME_TZ]}${PR_STUFF[TZ]}${PR_STUFF[SHIFT_IN]}${PR_STUFF[PS1_LINE]}${ACS[LTEE]}${ACS[RTEE]}\
 ${uptime_load}${PR_STUFF[PS1_LINE]}${ACS[LTEE]}${BATT_STAT}"
@@ -541,6 +552,7 @@ precmd () {
   # idea from zsh-users mailing list;
   # Matthew Wozniski <godlygeek@gmail.com>, Sep 29 2007
   local exitstatus="${?}"
+ 
   if [[ 0 -ne "${exitstatus}" && -z "${shownexterr}" ]]
   then
     PR_STUFF[exitstuff]="${exitstatus}"
@@ -687,12 +699,14 @@ TRAPALRM () {
 
 ##########
 ## prompts
-
 PS1='${PR_STUFF[SET_CHARSET]}${PR_STUFF[PS1_LINE]}\
 ${PR_STUFF[SHIFT_IN]}${ACS[ULCORNER]}${ACS[RTEE]}${PR_STUFF[SHIFT_OUT]}\
 %(0#.${PR_STUFF[WHITE]}${PR_STUFF[ps1_name]}@%M.${PR_STUFF[MAGENTA]}${PR_STUFF[ps1_name]}${PR_STUFF[PWD_OLD]}@${PR_STUFF[MAGENTA]}%M)\
 ${PR_STUFF[WHITE]}:${PR_STUFF[PWD_COLOR]}%${PR_STUFF[PWDLEN]}<...<%(1/.%~/.%~)%<<%u\
 ${PR_STUFF[NO_COLOR]}\
+${PR_STUFF[SHIFT_IN]}${ACS[LTEE]}\
+${PR_STUFF[NO_COLOR]}\
+${PR_STUFF[BRANCH]}\
 ${PR_STUFF[BG_PS]}${PR_STUFF[PS1_LINE]}\
 ${PR_STUFF[SHIFT_IN]}${ACS[LTEE]}\
 ${(e)PR_STUFF[FILLBAR]}\
