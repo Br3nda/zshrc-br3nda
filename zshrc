@@ -7,6 +7,8 @@
 # last updated 12 jun 2008 - under regular development, check back for updates
 ZSHRC='public release v0.130 - http://smasher.org/zsh/'
 
+source ~/.aliases
+
 # !! this is not intended to be a universal zshrc file !!
 # what's here works for me. i like it. the reason i'm
 # releasing this is for others to learn from it. if you
@@ -43,6 +45,8 @@ export HOME TERM	\
 
 WORDCHARS=':*?_-.[]~&;!#$%^(){}<>|'
 HISTSIZE=250
+HISTFILE=${HOME}/.zsh_history
+SAVEHIST=1000
 
 ## freebsd - turn on colors for ls
 [[ ${OSTYPE} == *freebsd* ]] && export CLICOLOR=yes
@@ -116,7 +120,7 @@ if [[ ${OSTYPE} == solaris* ]] {
 READNULLCMD=${PAGER}
 
 ## not all systems have `emacs`, but i like it when they do
-[[ -x $(whence -p emacs) ]] && export EDITOR=$(whence -p emacs)
+#[[ -x $(whence -p emacs) ]] && export EDITOR=$(whence -p emacs)
 
 ## if there's a `manpath` command, use it
 [[ -x $(whence -p manpath) ]] && export MANPATH=$(manpath 2> /dev/null)
@@ -134,14 +138,6 @@ typeset -A PR_STUFF
 alias mv='nocorrect mv'		# no spelling correction on mv (zsh FAQ 3.4)
 alias cp='nocorrect cp'		# no spelling correction on cp (zsh FAQ 3.4)
 alias mkdir='nocorrect mkdir'	# no spelling correction on mkdir (zsh FAQ 3.4)
-# enable color support of ls and also add handy aliases
-if [ "$TERM" != "dumb" ]; then
-  #eval "`dircolors -b`"
-  alias ls='ls --color=auto'
-  #alias dir='ls --color=auto --format=vertical'
-  #alias vdir='ls --color=auto --format=long'
-fi
-alias ll='ls -l'
 
 ## look for rsync - if it's found create a "cpv" function
 [[ -x $(whence -p rsync) ]] && cpv () {
