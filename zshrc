@@ -421,7 +421,8 @@ set_up_prompt () {
   done
   uptime_load="${PR_STUFF[SHIFT_OUT]}${color_loads}${PR_STUFF[SHIFT_IN]}"
 
-  PR_STUFF[BRANCH]=`git branch --no-color 2> /dev/null | egrep '^\*' | sed -e 's/* \(.*\)/\1/'`
+  PR_STUFF[BRANCH]=`git branch --no-color 2> /dev/null | egrep '^\*' | sed -e 's/* \(.*\)/\(\1\)/'`
+  PR_STUFF[SPACE]=`df -h -T . | grep "/" | sed -e 's/  / /g' | sed -e 's/  / /g' | sed -e 's/%/%%/'`
 
   ## time zone stuff - a linux system with a half-broken strftime(3) showed me that i like seeing
   ## the city name of the time zone i'm in. if that's not available then show the short version
@@ -441,9 +442,11 @@ set_up_prompt () {
   fi
 
   ## how much space will the time take up
-  local time_space="${#${(%):-$(print -P '%D{%H:%M} '${PR_STUFF[TZ]})}}"
+  local time_space="${#${(%):-$(print -P '%D{%H:%M} ')}}"
 
   local branchsize="${#${(%):-$(print ${PR_STUFF[BRANCH]})}}"
+
+  local spacesize="${#${(%):-$(print ${PR_STUFF[SPACE]})}}"
 
   ## if there's battery info, get it. otherwise don't (gracefully)
   ## the battery info comes from "/root/bin/bat-mon"
@@ -465,14 +468,14 @@ set_up_prompt () {
   ## count up the width of the things that are on the prompt
   local pwdsize=${#${(%):-%(1/.%~/.%~)}}
   
-  local termwidth_minus_promptsize_minus_pwdsize=$[${TERMWIDTH} - ${promptsize} - ${pwdsize} - ${branchsize} ]
+  local termwidth_minus_promptsize_minus_pwdsize=$[${TERMWIDTH} - ${promptsize} - ${pwdsize} - ${branchsize} - ${spacesize} -2 ]
 
   [[ 0 -gt ${termwidth_minus_promptsize_minus_pwdsize} ]] && termwidth_minus_promptsize_minus_pwdsize='0'
   PR_STUFF[PWDLEN]=$[${TERMWIDTH} - ${promptsize}]
   [[ 0 -gt $PR_STUFF[PWDLEN] ]] && PR_STUFF[PWDLEN]=1
 
   PR_STUFF[FILLBAR]="\${(r:${termwidth_minus_promptsize_minus_pwdsize}::${ACS[HLINE]}:)}\
-${ACS[RTEE]}${PR_STUFF[TIME]}${PR_STUFF[SHIFT_OUT]}%D{%H:%M} ${PR_STUFF[TIME_TZ]}${PR_STUFF[TZ]}${PR_STUFF[SHIFT_IN]}${PR_STUFF[PS1_LINE]}${ACS[LTEE]}${ACS[RTEE]}\
+${ACS[RTEE]}${PR_STUFF[TIME]}${PR_STUFF[SHIFT_OUT]}%D{%H:%M} ${PR_STUFF[SPACE]}${PR_STUFF[SHIFT_IN]}${PR_STUFF[PS1_LINE]}${ACS[LTEE]}${ACS[RTEE]}\
 ${uptime_load}${PR_STUFF[PS1_LINE]}${ACS[LTEE]}${BATT_STAT}"
 
   PR_STUFF[COLUMNS]=${COLUMNS}
