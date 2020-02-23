@@ -1,4 +1,5 @@
-# atom's .zshrc# atom's .zshrc
+# atom's .zshrc
+# atom's .zshrc
 # atom.smasher.org
 # atom @
 #       smasher.org
@@ -467,7 +468,7 @@ set_up_prompt () {
 
   ## count up the width of the things that are on the prompt
   local pwdsize=${#${(%):-%(1/.%~/.%~)}}
-  
+
   local termwidth_minus_promptsize_minus_pwdsize=$[${TERMWIDTH} - ${promptsize} - ${pwdsize} - ${branchsize} - ${spacesize} -2 ]
 
   [[ 0 -gt ${termwidth_minus_promptsize_minus_pwdsize} ]] && termwidth_minus_promptsize_minus_pwdsize='0'
@@ -555,7 +556,7 @@ precmd () {
   # idea from zsh-users mailing list;
   # Matthew Wozniski <godlygeek@gmail.com>, Sep 29 2007
   local exitstatus="${?}"
- 
+
   if [[ 0 -ne "${exitstatus}" && -z "${shownexterr}" ]]
   then
     PR_STUFF[exitstuff]="${exitstatus}"
